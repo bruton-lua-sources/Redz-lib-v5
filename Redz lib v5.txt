@@ -2826,7 +2826,7 @@ function Tab:AddColorPicker(Name, Default, Callback)
 	MainFrame.Name = "Main"
 	MainFrame.Parent = Group
 	MainFrame.BackgroundColor3 = CurrentTheme["Color Hub 2"]
-	MainFrame.Size = UDim2.new(1, -10, 0, 45)
+	MainFrame.Size = UDim2.new(1, -2, 0, 45)
 	MainFrame.AutoButtonColor = false
 	MainFrame.Text = ""
 	MainFrame.LayoutOrder = 1
@@ -2869,7 +2869,7 @@ function Tab:AddColorPicker(Name, Default, Callback)
 	PickerFrame.Name = "Picker"
 	PickerFrame.Parent = Group
 	PickerFrame.BackgroundColor3 = CurrentTheme["Color Hub 2"]
-	PickerFrame.Size = UDim2.new(1, -10, 0, 180)
+	PickerFrame.Size = UDim2.new(1, -2, 0, 180)
 	PickerFrame.Visible = false
 	PickerFrame.LayoutOrder = 2
 	Instance.new("UICorner", PickerFrame).CornerRadius = UDim.new(0, 8)
@@ -2887,9 +2887,11 @@ function Tab:AddColorPicker(Name, Default, Callback)
 	SatCursor.Size = UDim2.new(0, 12, 0, 12)
 	SatCursor.Position = UDim2.new(ColorPicker.Sat, 0, 1 - ColorPicker.Vib, 0)
 	SatCursor.AnchorPoint = Vector2.new(0.5, 0.5)
-	SatCursor.BackgroundColor3 = Color3.new(1,1,1)
+	SatCursor.BackgroundColor3 = ColorPicker.Value
 	Instance.new("UICorner", SatCursor).CornerRadius = UDim.new(1, 0)
-	Instance.new("UIStroke", SatCursor).Thickness = 2
+	local SatStroke = Instance.new("UIStroke", SatCursor)
+	SatStroke.Thickness = 2
+	SatStroke.Color = Color3.new(1, 1, 1)
 
 	local HueFrame = Instance.new("ImageLabel")
 	HueFrame.Parent = PickerFrame
@@ -2902,13 +2904,18 @@ function Tab:AddColorPicker(Name, Default, Callback)
 	HueCursor.Size = UDim2.new(0, 8, 1, 4)
 	HueCursor.Position = UDim2.new(ColorPicker.Hue, 0, 0.5, 0)
 	HueCursor.AnchorPoint = Vector2.new(0.5, 0.5)
-	HueCursor.BackgroundColor3 = Color3.new(1,1,1)
+	HueCursor.BackgroundColor3 = Color3.fromHSV(ColorPicker.Hue, 1, 1)
 	Instance.new("UICorner", HueCursor).CornerRadius = UDim.new(0, 2)
+	local HueStroke = Instance.new("UIStroke", HueCursor)
+	HueStroke.Thickness = 1.5
+	HueStroke.Color = Color3.new(1, 1, 1)
 
 	local function UpdateColor()
 		local Color = Color3.fromHSV(ColorPicker.Hue, ColorPicker.Sat, ColorPicker.Vib)
 		ColorIndicator.BackgroundColor3 = Color
 		SaturationFrame.BackgroundColor3 = Color3.fromHSV(ColorPicker.Hue, 1, 1)
+		SatCursor.BackgroundColor3 = Color
+		HueCursor.BackgroundColor3 = Color3.fromHSV(ColorPicker.Hue, 1, 1)
 		Callback(Color)
 	end
 
@@ -2931,7 +2938,7 @@ function Tab:AddColorPicker(Name, Default, Callback)
 	MainFrame.MouseButton1Click:Connect(function()
 		ColorPicker.Toggled = not ColorPicker.Toggled
 		PickerFrame.Visible = ColorPicker.Toggled
-		local targetSize = ColorPicker.Toggled and 230 or 45
+		local targetSize = ColorPicker.Toggled and 235 or 45
 		Arrow.Text = ColorPicker.Toggled and "↑" or "↓"
 		game:GetService("TweenService"):Create(Group, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, targetSize)}):Play()
 	end)
@@ -2970,7 +2977,6 @@ function Tab:AddColorPicker(Name, Default, Callback)
 	UpdateColor()
 	return ColorPicker
 end
-
 		return Tab
 	end
 	
