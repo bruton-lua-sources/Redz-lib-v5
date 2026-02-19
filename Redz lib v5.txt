@@ -2811,13 +2811,25 @@ function Tab:AddColorPicker(Name, Default, Callback)
 	
 	ColorPicker.Hue, ColorPicker.Sat, ColorPicker.Vib = ColorPicker.Value:ToHSV()
 
+	local Group = Instance.new("Frame")
+	Group.Name = Name .. "_Group"
+	Group.Parent = Container
+	Group.BackgroundTransparency = 1
+	Group.Size = UDim2.new(1, 0, 0, 45)
+	Group.ClipsDescendants = true
+
+	local List = Group:FindFirstChild("UIListLayout") or Instance.new("UIListLayout", Group)
+	List.SortOrder = Enum.SortOrder.LayoutOrder
+	List.Padding = UDim.new(0, 5)
+
 	local MainFrame = Instance.new("TextButton")
-	MainFrame.Name = Name
-	MainFrame.Parent = Container
+	MainFrame.Name = "Main"
+	MainFrame.Parent = Group
 	MainFrame.BackgroundColor3 = CurrentTheme["Color Hub 2"]
-	MainFrame.Size = UDim2.new(1, -20, 0, 45)
+	MainFrame.Size = UDim2.new(1, -10, 0, 45)
 	MainFrame.AutoButtonColor = false
 	MainFrame.Text = ""
+	MainFrame.LayoutOrder = 1
 	Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
 	
 	local MainStroke = Instance.new("UIStroke", MainFrame)
@@ -2838,15 +2850,15 @@ function Tab:AddColorPicker(Name, Default, Callback)
 	local ColorIndicator = Instance.new("Frame")
 	ColorIndicator.Parent = MainFrame
 	ColorIndicator.BackgroundColor3 = ColorPicker.Value
-	ColorIndicator.Size = UDim2.new(0, 30, 0, 20)
-	ColorIndicator.Position = UDim2.new(1, -75, 0.5, 0)
+	ColorIndicator.Size = UDim2.new(0, 35, 0, 22)
+	ColorIndicator.Position = UDim2.new(1, -85, 0.5, 0)
 	ColorIndicator.AnchorPoint = Vector2.new(0, 0.5)
 	Instance.new("UICorner", ColorIndicator).CornerRadius = UDim.new(0, 4)
 
 	local Arrow = Instance.new("TextLabel")
 	Arrow.Parent = MainFrame
 	Arrow.Text = "↓"
-	Arrow.Position = UDim2.new(1, -35, 0, 0)
+	Arrow.Position = UDim2.new(1, -40, 0, 0)
 	Arrow.Size = UDim2.new(0, 30, 1, 0)
 	Arrow.Font = Enum.Font.GothamBold
 	Arrow.TextColor3 = CurrentTheme["Color Dark Text"]
@@ -2854,11 +2866,12 @@ function Tab:AddColorPicker(Name, Default, Callback)
 	Arrow.BackgroundTransparency = 1
 
 	local PickerFrame = Instance.new("Frame")
-	PickerFrame.Parent = Container
+	PickerFrame.Name = "Picker"
+	PickerFrame.Parent = Group
 	PickerFrame.BackgroundColor3 = CurrentTheme["Color Hub 2"]
-	PickerFrame.Size = UDim2.new(1, -20, 0, 0)
-	PickerFrame.ClipsDescendants = true
+	PickerFrame.Size = UDim2.new(1, -10, 0, 180)
 	PickerFrame.Visible = false
+	PickerFrame.LayoutOrder = 2
 	Instance.new("UICorner", PickerFrame).CornerRadius = UDim.new(0, 8)
 	local PickStroke = Instance.new("UIStroke", PickerFrame)
 	PickStroke.Color = CurrentTheme["Color Stroke"]
@@ -2917,11 +2930,10 @@ function Tab:AddColorPicker(Name, Default, Callback)
 
 	MainFrame.MouseButton1Click:Connect(function()
 		ColorPicker.Toggled = not ColorPicker.Toggled
-		PickerFrame.Visible = true
-		local targetSize = ColorPicker.Toggled and UDim2.new(1, -20, 0, 180) or UDim2.new(1, -20, 0, 0)
+		PickerFrame.Visible = ColorPicker.Toggled
+		local targetSize = ColorPicker.Toggled and 230 or 45
 		Arrow.Text = ColorPicker.Toggled and "↑" or "↓"
-		game:GetService("TweenService"):Create(PickerFrame, TweenInfo.new(0.3), {Size = targetSize}):Play()
-		if not ColorPicker.Toggled then task.delay(0.3, function() if not ColorPicker.Toggled then PickerFrame.Visible = false end end) end
+		game:GetService("TweenService"):Create(Group, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, targetSize)}):Play()
 	end)
 
 	local DragHue = false
@@ -2958,6 +2970,7 @@ function Tab:AddColorPicker(Name, Default, Callback)
 	UpdateColor()
 	return ColorPicker
 end
+
 		return Tab
 	end
 	
