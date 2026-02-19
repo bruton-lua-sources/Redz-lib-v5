@@ -2797,6 +2797,165 @@ function redzlib:MakeWindow(Configs)
 
 	return InfoBruton
 end
+function Tab:AddColorPicker(text, default, callback)
+    local Players = game:GetService("Players")
+    local UIS = game:GetService("UserInputService")
+    local RunService = game:GetService("RunService")
+    local CurrentTheme = redzlib.Themes[redzlib.Save.Theme]
+    
+    local ColorPicker = {
+        Value = default or Color3.fromRGB(255, 255, 255),
+        Toggled = false
+    }
+
+    local MainFrame = Instance.new("TextButton")
+    MainFrame.Name = "ColorPicker"
+    MainFrame.Parent = Container
+    MainFrame.BackgroundColor3 = CurrentTheme["Color Hub 2"]
+    MainFrame.Size = UDim2.new(1, -20, 0, 40)
+    MainFrame.AutoButtonColor = false
+    MainFrame.Text = ""
+    local MainCorner = Instance.new("UICorner", MainFrame)
+    MainCorner.CornerRadius = UDim.new(0, 8)
+    
+    local MainStroke = Instance.new("UIStroke", MainFrame)
+    MainStroke.Color = CurrentTheme["Color Stroke"]
+    MainStroke.Thickness = 1
+    MainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+    local Title = Instance.new("TextLabel")
+    Title.Parent = MainFrame
+    Title.Text = text
+    Title.Position = UDim2.new(0, 15, 0, 0)
+    Title.Size = UDim2.new(1, -100, 1, 0)
+    Title.Font = Enum.Font.GothamMedium
+    Title.TextColor3 = CurrentTheme["Color Text"]
+    Title.TextSize = 14
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.BackgroundTransparency = 1
+
+    local ColorIndicator = Instance.new("Frame")
+    ColorIndicator.Parent = MainFrame
+    ColorIndicator.BackgroundColor3 = ColorPicker.Value
+    ColorIndicator.Size = UDim2.new(0, 24, 0, 24)
+    ColorIndicator.Position = UDim2.new(1, -65, 0.5, 0)
+    ColorIndicator.AnchorPoint = Vector2.new(0, 0.5)
+    local IndCorner = Instance.new("UICorner", ColorIndicator)
+    IndCorner.CornerRadius = UDim.new(0, 6)
+
+    local Arrow = Instance.new("TextLabel")
+    Arrow.Parent = MainFrame
+    Arrow.Text = "↓"
+    Arrow.Position = UDim2.new(1, -30, 0, 0)
+    Arrow.Size = UDim2.new(0, 30, 1, 0)
+    Arrow.Font = Enum.Font.GothamBold
+    Arrow.TextColor3 = CurrentTheme["Color Dark Text"]
+    Arrow.TextSize = 18
+    Arrow.BackgroundTransparency = 1
+
+    local PickerFrame = Instance.new("Frame")
+    PickerFrame.Parent = Container
+    PickerFrame.BackgroundColor3 = CurrentTheme["Color Hub 2"]
+    PickerFrame.Size = UDim2.new(1, -20, 0, 0)
+    PickerFrame.ClipsDescendants = true
+    PickerFrame.Visible = false
+    local PickCorner = Instance.new("UICorner", PickerFrame)
+    PickCorner.CornerRadius = UDim.new(0, 12)
+    
+    local PickStroke = Instance.new("UIStroke", PickerFrame)
+    PickStroke.Color = CurrentTheme["Color Stroke"]
+    PickStroke.Thickness = 1
+
+    local SaturationFrame = Instance.new("ImageLabel")
+    SaturationFrame.Parent = PickerFrame
+    SaturationFrame.Size = UDim2.new(1, -30, 0, 120)
+    SaturationFrame.Position = UDim2.new(0, 15, 0, 15)
+    SaturationFrame.Image = "rbxassetid://4155801252"
+    SaturationFrame.ScaleType = Enum.ScaleType.Stretch
+    
+    local SatCursor = Instance.new("Frame")
+    SatCursor.Parent = SaturationFrame
+    SatCursor.Size = UDim2.new(0, 10, 0, 10)
+    SatCursor.BackgroundColor3 = Color3.new(1,1,1)
+    SatCursor.BorderSizePixel = 0
+    Instance.new("UICorner", SatCursor).CornerRadius = UDim.new(1, 0)
+
+    local HueFrame = Instance.new("ImageLabel")
+    HueFrame.Parent = PickerFrame
+    HueFrame.Size = UDim2.new(1, -30, 0, 20)
+    HueFrame.Position = UDim2.new(0, 15, 0, 145)
+    HueFrame.Image = "rbxassetid://3641079629"
+    
+    local HueCursor = Instance.new("Frame")
+    HueCursor.Parent = HueFrame
+    HueCursor.Size = UDim2.new(0, 6, 1, 4)
+    HueCursor.Position = UDim2.new(0, 0, 0.5, 0)
+    HueCursor.AnchorPoint = Vector2.new(0.5, 0.5)
+    HueCursor.BackgroundColor3 = Color3.new(1,1,1)
+
+    local h, s, v = ColorPicker.Value:ToHSV()
+    local draggingHue = false
+    local draggingSat = false
+
+    local function updateColor()
+        local finalColor = Color3.fromHSV(h, s, v)
+        ColorIndicator.BackgroundColor3 = finalColor
+        SaturationFrame.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
+        callback(finalColor)
+    end
+
+    MainFrame.MouseButton1Click:Connect(function()
+        ColorPicker.Toggled = not ColorPicker.Toggled
+        PickerFrame.Visible = true
+        local targetSize = ColorPicker.Toggled and UDim2.new(1, -20, 0, 180) or UDim2.new(1, -20, 0, 0)
+        local targetArrow = ColorPicker.Toggled and "↑" or "↓"
+        
+        game:GetService("TweenService"):Create(PickerFrame, TweenInfo.new(0.3), {Size = targetSize}):Play()
+        Arrow.Text = targetArrow
+        
+        if not ColorPicker.Toggled then
+            task.delay(0.3, function() if not ColorPicker.Toggled then PickerFrame.Visible = false end end)
+        end
+    end)
+
+    HueFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingHue = true end
+    end)
+
+    SaturationFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingSat = true end
+    end)
+
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            draggingHue = false
+            draggingSat = false
+        end
+    end)
+
+    RunService.RenderStepped:Connect(function()
+        if draggingHue then
+            local mousePos = UIS:GetMouseLocation()
+            local relativeX = math.clamp((mousePos.X - HueFrame.AbsolutePosition.X) / HueFrame.AbsoluteSize.X, 0, 1)
+            h = relativeX
+            HueCursor.Position = UDim2.new(relativeX, 0, 0.5, 0)
+            updateColor()
+        end
+        if draggingSat then
+            local mousePos = UIS:GetMouseLocation()
+            local relativeX = math.clamp((mousePos.X - SaturationFrame.AbsolutePosition.X) / SaturationFrame.AbsoluteSize.X, 0, 1)
+            local relativeY = math.clamp((mousePos.Y - (SaturationFrame.AbsolutePosition.Y + 36)) / SaturationFrame.AbsoluteSize.Y, 0, 1)
+            s = relativeX
+            v = 1 - relativeY
+            SatCursor.Position = UDim2.new(s, -5, 1 - v, -5)
+            updateColor()
+        end
+    end)
+
+    updateColor()
+    return ColorPicker
+end
+
 		return Tab
 	end
 	
